@@ -11,7 +11,7 @@ var minimaxRoot = function (depth, game, isMaximisingPlayer) {
 	for (var i = 0; i < newGameMoves.length; i++) {
 		var newGameMove = newGameMoves[i];
 		game.ugly_move(newGameMove);
-		var value = minimax(depth - 1, game, !isMaximisingPlayer);
+		var value = minimax(depth - 1, game, -10000, 10000, !isMaximisingPlayer);
 		game.undo();
 		if (value >= bestMove) {
 			bestMove = value;
@@ -21,7 +21,7 @@ var minimaxRoot = function (depth, game, isMaximisingPlayer) {
 	return bestMoveFound;
 };
 
-var minimax = function (depth, game, isMaximisingPlayer) {
+var minimax = function (depth, game, alpha, beta, isMaximisingPlayer) {
 	positionCount++;
 	if (depth === 0) {
 		return -evaluateBoard(game.board());
@@ -35,9 +35,13 @@ var minimax = function (depth, game, isMaximisingPlayer) {
 			game.ugly_move(newGameMoves[i]);
 			bestMove = Math.max(
 				bestMove,
-				minimax(depth - 1, game, !isMaximisingPlayer)
+				minimax(depth - 1, game, alpha, beta, !isMaximisingPlayer)
 			);
 			game.undo();
+			alpha = Math.max(alpha, bestMove);
+			if (beta <= alpha) {
+				return bestMove;
+			}
 		}
 		return bestMove;
 	} else {
@@ -46,9 +50,13 @@ var minimax = function (depth, game, isMaximisingPlayer) {
 			game.ugly_move(newGameMoves[i]);
 			bestMove = Math.min(
 				bestMove,
-				minimax(depth - 1, game, !isMaximisingPlayer)
+				minimax(depth - 1, game, alpha, beta, !isMaximisingPlayer)
 			);
 			game.undo();
+			beta = Math.min(beta, bestMove);
+			if (beta <= alpha) {
+				return bestMove;
+			}
 		}
 		return bestMove;
 	}
@@ -58,13 +66,13 @@ var evaluateBoard = function (board) {
 	var totalEvaluation = 0;
 	for (var i = 0; i < 8; i++) {
 		for (var j = 0; j < 8; j++) {
-			totalEvaluation = totalEvaluation + getPieceValue(board[i][j]);
+			totalEvaluation = totalEvaluation + getPieceValue(board[i][j], i, j);
 		}
 	}
 	return totalEvaluation;
 };
 
-var getPieceValue = function (piece) {
+var getPieceValue = function (piece, x, y) {
 	if (piece === null) {
 		return 0;
 	}
@@ -89,7 +97,7 @@ var getPieceValue = function (piece) {
 	return piece.color === "w" ? absoluteValue : -absoluteValue;
 };
 
-/* board visualization and games state handling starts here*/
+/* board visualization and games state handling */
 
 var onDragStart = function (source, piece, position, orientation) {
 	if (
