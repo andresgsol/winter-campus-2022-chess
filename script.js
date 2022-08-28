@@ -5,8 +5,59 @@ var board,
 
 var calculateBestMove = function (game) {
 	var newGameMoves = game.ugly_moves();
+	var bestMove = null;
+	//use any negative large number
+	var bestValue = -9999;
 
-	return newGameMoves[Math.floor(Math.random() * newGameMoves.length)];
+	for (var i = 0; i < newGameMoves.length; i++) {
+		var newGameMove = newGameMoves[i];
+		game.ugly_move(newGameMove);
+
+		//take the negative as AI plays as black
+		var boardValue = -evaluateBoard(game.board());
+		game.undo();
+		if (boardValue > bestValue) {
+			bestValue = boardValue;
+			bestMove = newGameMove;
+		}
+	}
+
+	return bestMove;
+};
+
+var evaluateBoard = function (board) {
+	var totalEvaluation = 0;
+	for (var i = 0; i < 8; i++) {
+		for (var j = 0; j < 8; j++) {
+			totalEvaluation = totalEvaluation + getPieceValue(board[i][j]);
+		}
+	}
+	return totalEvaluation;
+};
+
+var getPieceValue = function (piece) {
+	if (piece === null) {
+		return 0;
+	}
+	var getAbsoluteValue = function (piece) {
+		if (piece.type === "p") {
+			return 10;
+		} else if (piece.type === "r") {
+			return 50;
+		} else if (piece.type === "n") {
+			return 30;
+		} else if (piece.type === "b") {
+			return 30;
+		} else if (piece.type === "q") {
+			return 90;
+		} else if (piece.type === "k") {
+			return 900;
+		}
+		throw "Unknown piece type: " + piece.type;
+	};
+
+	var absoluteValue = getAbsoluteValue(piece);
+	return piece.color === "w" ? absoluteValue : -absoluteValue;
 };
 
 /* board visualization and games state handling starts here*/
