@@ -1,12 +1,24 @@
 var board,
-	game = new Chess();
+    game = new Chess();
+    
+/* The "AI" part starts here */
 
-/*The "AI" part starts here */
+var makeBestMove = function () {
+    var bestMove = getBestMove(game);
+    game.ugly_move(bestMove);
+    board.position(game.fen());
+    renderMoveHistory(game.history());
+    if (game.game_over()) {
+        alert("Game over");
+    }
+};
 
-var calculateBestMove = function (game) {
-	var newGameMoves = game.ugly_moves();
-
-	return newGameMoves[Math.floor(Math.random() * newGameMoves.length)];
+var getBestMove = function (game) {
+    if (game.game_over()) {
+        alert("Game over");
+    }
+    var newGameMoves = game.ugly_moves();
+    return newGameMoves[Math.floor(Math.random() * newGameMoves.length)];
 };
 
 /* board visualization and games state handling starts here*/
@@ -19,24 +31,6 @@ var onDragStart = function (source, piece, position, orientation) {
 	) {
 		return false;
 	}
-};
-
-var makeBestMove = function () {
-	var bestMove = getBestMove(game);
-	game.ugly_move(bestMove);
-	board.position(game.fen());
-	renderMoveHistory(game.history());
-	if (game.game_over()) {
-		alert("Game over");
-	}
-};
-
-var getBestMove = function (game) {
-	if (game.game_over()) {
-		alert("Game over");
-	}
-	var bestMove = calculateBestMove(game);
-	return bestMove;
 };
 
 var renderMoveHistory = function (moves) {
